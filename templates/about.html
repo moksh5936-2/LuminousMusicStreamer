@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}About LuminousMusicBot{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-dark shadow-sm mb-4">
+                <div class="card-header bg-dark">
+                    <h2 class="mb-0">About LuminousMusicBot</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">A lightweight Telegram music bot designed for voice chat streaming with multi-group support.</p>
+                    
+                    <h4 class="mt-4">Technologies</h4>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item bg-dark">
+                            <strong>Backend:</strong> Python, Flask, SQLAlchemy
+                        </li>
+                        <li class="list-group-item bg-dark">
+                            <strong>Telegram API:</strong> Pyrogram
+                        </li>
+                        <li class="list-group-item bg-dark">
+                            <strong>YouTube Integration:</strong> YT-DLP
+                        </li>
+                        <li class="list-group-item bg-dark">
+                            <strong>Frontend:</strong> Bootstrap, JavaScript
+                        </li>
+                    </ul>
+                    
+                    <h4>Features</h4>
+                    <ul class="list-group list-group-flush mb-4">
+                        <li class="list-group-item bg-dark">✅ High-quality audio streaming in Telegram voice chats</li>
+                        <li class="list-group-item bg-dark">✅ Web interface for searching and managing music</li>
+                        <li class="list-group-item bg-dark">✅ YouTube search with thumbnail previews</li>
+                        <li class="list-group-item bg-dark">✅ Multi-group support with independent playback</li>
+                        <li class="list-group-item bg-dark">✅ Search history tracking</li>
+                        <li class="list-group-item bg-dark">✅ Optimized for Replit and Heroku deployment</li>
+                    </ul>
+                    
+                    <h4>Bot Commands</h4>
+                    <div class="table-responsive">
+                        <table class="table table-dark">
+                            <thead>
+                                <tr>
+                                    <th>Command</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>/play</code> or <code>/p</code></td>
+                                    <td>Play a song in the voice chat (requires query or URL)</td>
+                                </tr>
+                                <tr>
+                                    <td><code>/stop</code> or <code>/s</code></td>
+                                    <td>Stop playback and leave the voice chat</td>
+                                </tr>
+                                <tr>
+                                    <td><code>/help</code> or <code>/h</code></td>
+                                    <td>Display help message with all commands</td>
+                                </tr>
+                                <tr>
+                                    <td><code>/about</code></td>
+                                    <td>Show information about the bot</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <a href="https://t.me/luminous_music_bot" class="btn btn-primary">
+                            <svg width="16" height="16" fill="currentColor" class="bi bi-telegram me-1" viewBox="0 0 16 16">
+                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.287 5.906c-.778.324-2.334.994-4.666 2.01-.378.15-.577.298-.595.442-.03.243.275.339.69.47l.175.055c.408.133.958.288 1.243.294.26.006.549-.1.868-.32 2.179-1.471 3.304-2.214 3.374-2.23.05-.012.12-.026.166.016.047.041.042.12.037.141-.03.129-1.227 1.241-1.846 1.817-.193.18-.33.307-.358.336a8.154 8.154 0 0 1-.188.186c-.38.366-.664.64.015 1.088.327.216.589.393.85.571.284.194.568.387.936.629.093.06.183.125.27.187.331.236.63.448.997.414.214-.02.435-.22.547-.82.265-1.417.786-4.486.906-5.751a1.426 1.426 0 0 0-.013-.315.337.337 0 0 0-.114-.217.526.526 0 0 0-.31-.093c-.3.005-.763.166-2.984 1.09z"/>
+                            </svg>
+                            Open in Telegram
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

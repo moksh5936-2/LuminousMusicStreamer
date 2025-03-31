@@ -1,0 +1,74 @@
+/* Custom styles for LuminousMusicBot */
+
+/* Additional spacing for the footer */
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.footer {
+    margin-top: auto;
+}
+
+/* Card styling */
+.card {
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.card-header {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* List group styling */
+.list-group-item {
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Navbar brand styling */
+.navbar-brand {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+/* Table hover effect */
+.table-hover tbody tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Link styling */
+a {
+    transition: all 0.2s ease;
+}
+
+a:hover {
+    opacity: 0.8;
+}
+
+/* Button styling */
+.btn {
+    border-radius: 5px;
+    padding: 0.5rem 1.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+}
+
+/* Alert styling */
+.alert {
+    border-radius: 5px;
+}
+
+/* Custom icon colors */
+.text-youtube {
+    color: #ff0000;
+}
+
+.text-telegram {
+    color: #0088cc;
+}
