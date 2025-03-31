@@ -1,0 +1,39 @@
+{
+  "name": "LuminousMusicBot",
+  "description": "A lightweight Telegram music bot that streams YouTube audio in voice chats with multi-group support.",
+  "repository": "https://github.com/yourusername/LuminousMusicBot",
+  "keywords": ["python", "telegram", "bot", "music", "youtube", "voice-chat"],
+  "env": {
+    "API_ID": {
+      "description": "Telegram API ID from my.telegram.org/apps",
+      "required": true
+    },
+    "API_HASH": {
+      "description": "Telegram API Hash from my.telegram.org/apps",
+      "required": true
+    },
+    "BOT_TOKEN": {
+      "description": "Telegram Bot Token from @BotFather",
+      "required": true
+    },
+    "SESSION_SECRET": {
+      "description": "Random secret key for Flask sessions",
+      "generator": "secret"
+    },
+    "SESSION_STRING": {
+      "description": "Pyrogram session string (optional)",
+      "required": false
+    },
+    "DATABASE_URL": {
+      "description": "Will be automatically added by Heroku PostgreSQL addon"
+    }
+  },
+  "addons": [
+    "heroku-postgresql:hobby-dev"
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}
