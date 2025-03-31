@@ -121,9 +121,22 @@ _To actually play this in a voice chat, I would need PyTgCalls which is not curr
         help_text = """
 **🎵 LuminousMusicBot Commands 🎵**
 
-`/play <song_name or URL>` - Search for a song (demo mode - no actual playback)
+**Core Commands:**
+`/play <song_name or URL>` - Search for a song and play it
+`/stop` - Stop playback and leave voice chat
+`/skip` or `/next` - Skip to the next song in queue
+`/pause` - Pause the current playback
+`/resume` - Resume paused playback
+
+**Additional Commands:**
+`/queue` or `/q` - Show the current song queue
+`/volume <level>` or `/vol <level>` - Set volume (0-100)
+`/lyrics <song_name>` or `/ly <song_name>` - Get lyrics for a song
+
+**General Commands:**
+`/start` - Start the bot
 `/help` - Show this help message
-`/about` - About this bot
+`/about` - Information about this bot
 
 **Note:** This is a simplified version without voice chat functionality.
 For a full version with voice chat support, you would need to deploy with PyTgCalls.
@@ -155,6 +168,10 @@ A lightweight Telegram bot designed for music playback in voice chats.
 **Technologies:**
 - Pyrogram (Telegram API)
 - YT-DLP (YouTube integration)
+- Flask (Web Interface)
+- SQLAlchemy (Database)
+
+**Made by:** Moksh Gupta
 
 **Note:** This is a simplified version for demonstration.
 """
