@@ -113,41 +113,66 @@ class MusicPlayer:
             bool: True if voice chat is active or was created, False otherwise
         """
         try:
+            # Check if the chat_id is a valid group or channel ID (not a private chat)
+            # Valid group IDs are usually negative numbers, but not all negative numbers are groups
+            # We need to make sure it's a super group or channel
+            
+            if chat_id > 0:
+                logger.error(f"Cannot create voice chat in private chat {chat_id}")
+                return False
+                
             # Try to get group call info
-            peer = await self.client.resolve_peer(chat_id)
+            try:
+                peer = await self.client.resolve_peer(chat_id)
+            except Exception as e:
+                logger.error(f"Failed to resolve peer for chat_id {chat_id}: {e}")
+                return False
+                
+            # Check if this is a channel/supergroup
             if isinstance(peer, InputPeerChannel):
-                full_chat = await self.client.invoke(
-                    GetFullChannel(
-                        channel=InputChannel(
-                            channel_id=peer.channel_id,
-                            access_hash=peer.access_hash
-                        )
-                    )
-                )
-                
-                # Check if there's already a group call
-                if hasattr(full_chat, 'full_chat') and hasattr(full_chat.full_chat, 'call'):
-                    logger.info(f"Voice chat is already active in chat {chat_id}")
-                    return True
-                
-                # If not, try to create one
-                logger.info(f"Creating voice chat in chat {chat_id}")
                 try:
-                    await self.client.invoke(
-                        CreateGroupCall(
-                            peer=peer,
-                            random_id=random.randint(10000, 999999999)
+                    full_chat = await self.client.invoke(
+                        GetFullChannel(
+                            channel=InputChannel(
+                                channel_id=peer.channel_id,
+                                access_hash=peer.access_hash
+                            )
                         )
                     )
-                    logger.info(f"Voice chat created in chat {chat_id}")
-                    # Sleep briefly to allow voice chat to initialize
-                    await asyncio.sleep(2)
-                    return True
+                    
+                    # Check if there's already a group call
+                    if hasattr(full_chat, 'full_chat') and hasattr(full_chat.full_chat, 'call'):
+                        logger.info(f"Voice chat is already active in chat {chat_id}")
+                        return True
+                    
+                    # If not, try to create one
+                    logger.info(f"Creating voice chat in chat {chat_id}")
+                    try:
+                        await self.client.invoke(
+                            CreateGroupCall(
+                                peer=peer,
+                                random_id=random.randint(10000, 999999999)
+                            )
+                        )
+                        logger.info(f"Voice chat created in chat {chat_id}")
+                        # Sleep briefly to allow voice chat to initialize
+                        await asyncio.sleep(2)
+                        return True
+                    except Exception as e:
+                        if "USER_NOT_ADMIN" in str(e):
+                            logger.error(f"Bot is not an admin in the chat {chat_id}, cannot create voice chat")
+                            return False
+                        elif "PARTICIPANTS_TOO_FEW" in str(e):
+                            logger.error(f"Not enough participants to create a voice chat in {chat_id}")
+                            return False
+                        else:
+                            logger.error(f"Failed to create voice chat: {e}")
+                            return False
                 except Exception as e:
-                    logger.error(f"Failed to create voice chat: {e}")
+                    logger.error(f"Error getting full channel info: {e}")
                     return False
             else:
-                logger.error(f"Chat ID {chat_id} is not a channel/group")
+                logger.error(f"Chat ID {chat_id} is not a channel/group (peer type: {type(peer).__name__})")
                 return False
         except Exception as e:
             logger.error(f"Error ensuring voice chat: {e}")
@@ -166,6 +191,10 @@ class MusicPlayer:
             str: Status message
         """
         try:
+            # Check if this is a valid group chat first
+            if chat_id > 0:
+                return "❌ Voice chats are only available in groups and channels, not in private chats."
+            
             # Get video info first
             logger.info(f"Searching for query: {query}")
             video_info = await get_video_info(query)
@@ -210,7 +239,19 @@ class MusicPlayer:
                 # First, ensure there's a voice chat
                 voice_chat_active = await self._ensure_voice_chat(chat_id)
                 if not voice_chat_active:
-                    return "❌ Could not join or create a voice chat. Make sure I have the right permissions or that a voice chat is active."
+                    return """❌ Could not join or create a voice chat.
+
+Possible reasons:
+• The bot isn't an administrator in the group
+• The bot doesn't have permission to manage voice chats
+• There isn't an active voice chat and the bot can't create one
+• The chat is not a group or channel
+
+Please make sure:
+1. The bot is added as an administrator
+2. The bot has 'Manage Voice Chats' permission
+3. You're using the bot in a group or channel, not a private chat
+4. A voice chat is already active if the bot can't create one"""
                 
                 # Download the audio
                 logger.info(f"Downloading audio for: {title}")
@@ -253,9 +294,13 @@ class MusicPlayer:
 📱 **Status:** Playing in voice chat
 """
                 except Exception as e:
-                    # Handle any exception since NoActiveGroupCall isn't explicitly imported
+                    # Handle specific errors with better messages
                     if "No active group call" in str(e):
-                        return "❌ No active group call found. Please start a voice chat first."
+                        return "❌ No active voice chat found. Please start a voice chat first."
+                    elif "GROUPCALL_FORBIDDEN" in str(e):
+                        return "❌ The bot doesn't have permission to join the voice chat. Make sure it's an admin with 'Manage Voice Chats' permission."
+                    elif "GROUPCALL_INVALID" in str(e):
+                        return "❌ The voice chat is no longer active or valid. Try starting a new voice chat."
                     else:
                         logger.error(f"Error joining voice chat: {e}")
                         return f"❌ Error joining voice chat: {str(e)}"

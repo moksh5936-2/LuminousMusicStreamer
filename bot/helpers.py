@@ -39,6 +39,19 @@ def register_handlers(client):
     async def play_handler(_, message: Message):
         """Handle /play command"""
         try:
+            # Check if this is a private chat (where voice chats aren't available)
+            if message.chat.type == "private":
+                await message.reply("""
+❌ **I can't play music in private chats!**
+
+Voice chats are only available in groups and channels.
+
+Please add me to a group as an administrator, then use the /play command there.
+
+See /help for setup instructions.
+""")
+                return
+                
             # Check if there's a query after the command
             if len(message.command) < 2:
                 await message.reply("Please provide a song name or YouTube URL.\nExample: `/play despacito`")
@@ -63,10 +76,29 @@ def register_handlers(client):
             logger.error(f"Error in play_handler: {e}")
             await message.reply(f"❌ An error occurred: {str(e)}")
     
+    # Helper function to check if chat is private
+    async def check_private_chat(message):
+        if message.chat.type == "private":
+            await message.reply("""
+❌ **Music commands only work in groups!**
+
+Voice chats are only available in groups and channels.
+
+Please add me to a group as an administrator, then use commands there.
+
+See /help for setup instructions.
+""")
+            return True
+        return False
+            
     @client.on_message(STOP_COMMAND)
     async def stop_handler(_, message: Message):
         """Handle /stop command"""
         try:
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
             chat_id = message.chat.id
             result = await music_player.stop(chat_id)
             await message.reply(result)
@@ -78,6 +110,10 @@ def register_handlers(client):
     async def skip_handler(_, message: Message):
         """Handle /skip command"""
         try:
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
             chat_id = message.chat.id
             if hasattr(music_player, 'skip'):
                 result = await music_player.skip(chat_id)
@@ -92,6 +128,10 @@ def register_handlers(client):
     async def pause_handler(_, message: Message):
         """Handle /pause command"""
         try:
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
             chat_id = message.chat.id
             if hasattr(music_player, 'pause'):
                 result = await music_player.pause(chat_id)
@@ -106,6 +146,10 @@ def register_handlers(client):
     async def resume_handler(_, message: Message):
         """Handle /resume command"""
         try:
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
             chat_id = message.chat.id
             if hasattr(music_player, 'resume'):
                 result = await music_player.resume(chat_id)
@@ -120,6 +164,10 @@ def register_handlers(client):
     async def queue_handler(_, message: Message):
         """Handle /queue command"""
         try:
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
             chat_id = message.chat.id
             if hasattr(music_player, 'queue'):
                 result = await music_player.queue(chat_id)
@@ -133,6 +181,7 @@ def register_handlers(client):
     @client.on_message(LYRICS_COMMAND)
     async def lyrics_handler(_, message: Message):
         """Handle /lyrics command"""
+        # This command can work in any chat since it doesn't rely on voice chats
         if len(message.command) < 2:
             await message.reply("Please provide a song name to search for lyrics.\nExample: `/lyrics despacito`")
             return
@@ -143,23 +192,28 @@ def register_handlers(client):
     @client.on_message(VOLUME_COMMAND)
     async def volume_handler(_, message: Message):
         """Handle /volume command"""
-        if len(message.command) < 2:
-            await message.reply("Please provide a volume level (1-100).\nExample: `/volume 50`")
-            return
-            
         try:
-            volume_level = int(message.command[1])
-            if 0 <= volume_level <= 100:
-                chat_id = message.chat.id
-                if hasattr(music_player, 'volume'):
-                    result = await music_player.volume(chat_id, volume_level)
-                    await message.reply(result)
+            # Check if this is a private chat
+            if await check_private_chat(message):
+                return
+                
+            if len(message.command) < 2:
+                await message.reply("Please provide a volume level (1-100).\nExample: `/volume 50`")
+                return
+                
+            try:
+                volume_level = int(message.command[1])
+                if 0 <= volume_level <= 100:
+                    chat_id = message.chat.id
+                    if hasattr(music_player, 'volume'):
+                        result = await music_player.volume(chat_id, volume_level)
+                        await message.reply(result)
+                    else:
+                        await message.reply(f"🔊 Volume set to {volume_level}% (This is a demo response, volume control is not available in this version)")
                 else:
-                    await message.reply(f"🔊 Volume set to {volume_level}% (This is a demo response, volume control is not available in this version)")
-            else:
-                await message.reply("⚠️ Volume level must be between 0 and 100")
-        except ValueError:
-            await message.reply("⚠️ Please provide a valid number for volume level")
+                    await message.reply("⚠️ Volume level must be between 0 and 100")
+            except ValueError:
+                await message.reply("⚠️ Please provide a valid number for volume level")
         except Exception as e:
             logger.error(f"Error in volume_handler: {e}")
             await message.reply(f"❌ Error setting volume: {str(e)}")
@@ -188,7 +242,13 @@ def register_handlers(client):
 `/help` - Show this help message
 `/about` - Information about this bot
 
-**Note:** All commands are fully functional. The bot will download the audio, join the voice chat, and play the music.
+**⚠️ IMPORTANT SETUP INSTRUCTIONS ⚠️**
+1. Add this bot to your group as an **administrator**
+2. Give the bot **"Manage Voice Chats"** permission
+3. Start a voice chat in your group
+4. Use /play command in the group (not in private chat)
+
+**Note:** Voice chats are only available in **groups** and **channels**, not in private chats.
 For best performance, ensure the bot has permission to join and speak in voice chats.
 """
         await message.reply(help_text)
@@ -207,6 +267,12 @@ I'm **LuminousMusicBot**, a lightweight Telegram music bot that can play songs i
 • Queue system for multiple songs
 • Control playback with pause/resume/skip commands
 • Web interface for song search history
+
+**⚠️ IMPORTANT: I can only play music in group voice chats! ⚠️**
+1. Add me to your group as an administrator
+2. Give me "Manage Voice Chats" permission
+3. Start a voice chat in your group
+4. Use /play command in the group
 
 Use `/help` to see all available commands.
 """
