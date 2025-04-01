@@ -50,7 +50,9 @@ with app.app_context():
 @app.route('/')
 def index():
     """Home page"""
-    return render_template('index.html')
+    # Set your bot's username (this will be available in the template)
+    bot_username = os.environ.get("BOT_USERNAME", "ADHISHTHA_bot")
+    return render_template('index.html', bot_username=bot_username)
 
 @app.route('/about')
 def about():
