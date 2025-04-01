@@ -6,8 +6,7 @@ import re
 from pyrogram import filters
 from pyrogram.types import Message
 from bot.ytdl import get_video_info
-# Temporarily use the simulated player instead of MusicPlayer due to API rate limits
-from bot.simulated_player import SimulatedMusicPlayer
+from bot.music_player import MusicPlayer
 
 # Set up logging
 logger = logging.getLogger(__name__)
@@ -34,8 +33,7 @@ def register_handlers(client):
     """
     # Initialize the music player
     global music_player
-    # Temporarily using simulated player due to API rate limits
-    music_player = SimulatedMusicPlayer(client)
+    music_player = MusicPlayer(client, None)  # No session string needed
     
     @client.on_message(PLAY_COMMAND)
     async def play_handler(_, message: Message):
