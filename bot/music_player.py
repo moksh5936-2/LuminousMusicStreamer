@@ -105,11 +105,13 @@ class MusicPlayer:
     async def _ensure_voice_chat(self, chat_id: int) -> bool:
         """Check if voice chat is active in the chat"""
         try:
-            # Get full channel/chat information
+            # Try to get full chat to check voice chat status
             chat = await self.client.get_chat(chat_id)
-
-            # Check if voice chat exists
-            if chat.voice_chat:
+            
+            # Get group call using PyTgCalls
+            group_call = await self.pytgcalls.get_group_call(chat_id)
+            
+            if group_call:
                 logger.info(f"Voice chat is active in chat {chat_id}")
                 return True
             else:
@@ -123,7 +125,7 @@ class MusicPlayer:
             logger.error(f"Error checking voice chat status: {e}")
             await self.client.send_message(
                 chat_id,
-                "❌ Error checking voice chat status. Make sure I'm an admin and try again."
+                "❌ Please make sure:\n1. A voice chat is active\n2. The bot is an admin\n3. The bot has permission to manage voice chats"
             )
             return False
 
