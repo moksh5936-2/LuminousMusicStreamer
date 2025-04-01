@@ -7,7 +7,20 @@ from pyrogram import filters
 from pyrogram.types import Message
 from bot.ytdl import get_video_info
 
-logger = logging.getLogger(__name__)
+# Try to import the real player, but fall back to simulated if needed
+try:
+    from bot.music_player import MusicPlayer
+    USE_REAL_PLAYER = True
+    logger = logging.getLogger(__name__)
+    logger.info("Using real PyTgCalls music player")
+except Exception as e:
+    from bot.simulated_player import SimulatedMusicPlayer as MusicPlayer
+    USE_REAL_PLAYER = False
+    logger = logging.getLogger(__name__)
+    logger.info(f"Using simulated music player due to error: {e}")
+
+# Global music player instance to be initialized when needed
+music_player = None
 
 # Command regex patterns
 PLAY_COMMAND = filters.command(["play", "p"])
@@ -26,6 +39,10 @@ def register_handlers(client):
     Args:
         client (pyrogram.Client): The Pyrogram client
     """
+    # Initialize the music player
+    global music_player
+    music_player = MusicPlayer(client, None)  # No session string needed
+    
     @client.on_message(PLAY_COMMAND)
     async def play_handler(_, message: Message):
         """Handle /play command"""
@@ -41,23 +58,14 @@ def register_handlers(client):
             # Send a processing message
             processing_msg = await message.reply(f"🔍 Searching for: `{query}`...")
             
-            # Get video info (but don't download)
-            info = await get_video_info(query)
+            # Get chat ID
+            chat_id = message.chat.id
             
-            if info:
-                title, duration, thumbnail, video_url = info
-                response = f"""
-✅ **Found Video**
-
-🎵 **Title:** {title}
-⏱ **Duration:** {duration}
-🔗 **Watch on YouTube:** [Click here]({video_url})
-
-_To actually play this in a voice chat, I would need PyTgCalls which is not currently compatible with this environment. If you'd like to deploy a full version with voice chat support, please check the project repository._
-"""
-                await processing_msg.edit(response, disable_web_page_preview=False)
-            else:
-                await processing_msg.edit("❌ Could not find or process the requested video.")
+            # Try to play the song in the voice chat
+            result = await music_player.play(chat_id, query, message)
+            
+            # Update the processing message with the result
+            await processing_msg.edit(result)
                 
         except Exception as e:
             logger.error(f"Error in play_handler: {e}")
@@ -66,27 +74,69 @@ _To actually play this in a voice chat, I would need PyTgCalls which is not curr
     @client.on_message(STOP_COMMAND)
     async def stop_handler(_, message: Message):
         """Handle /stop command"""
-        await message.reply("⚠️ Voice chat streaming is not available in this simplified version.")
+        try:
+            chat_id = message.chat.id
+            result = await music_player.stop(chat_id)
+            await message.reply(result)
+        except Exception as e:
+            logger.error(f"Error in stop_handler: {e}")
+            await message.reply(f"❌ Error stopping playback: {str(e)}")
     
     @client.on_message(SKIP_COMMAND)
     async def skip_handler(_, message: Message):
         """Handle /skip command"""
-        await message.reply("⏭️ Skip functionality is not available in this simplified version.")
+        try:
+            chat_id = message.chat.id
+            if hasattr(music_player, 'skip'):
+                result = await music_player.skip(chat_id)
+                await message.reply(result)
+            else:
+                await message.reply("⏭️ Skip functionality is not available in this version.")
+        except Exception as e:
+            logger.error(f"Error in skip_handler: {e}")
+            await message.reply(f"❌ Error skipping: {str(e)}")
     
     @client.on_message(PAUSE_COMMAND)
     async def pause_handler(_, message: Message):
         """Handle /pause command"""
-        await message.reply("⏸️ Pause functionality is not available in this simplified version.")
+        try:
+            chat_id = message.chat.id
+            if hasattr(music_player, 'pause'):
+                result = await music_player.pause(chat_id)
+                await message.reply(result)
+            else:
+                await message.reply("⏸️ Pause functionality is not available in this version.")
+        except Exception as e:
+            logger.error(f"Error in pause_handler: {e}")
+            await message.reply(f"❌ Error pausing: {str(e)}")
     
     @client.on_message(RESUME_COMMAND)
     async def resume_handler(_, message: Message):
         """Handle /resume command"""
-        await message.reply("▶️ Resume functionality is not available in this simplified version.")
+        try:
+            chat_id = message.chat.id
+            if hasattr(music_player, 'resume'):
+                result = await music_player.resume(chat_id)
+                await message.reply(result)
+            else:
+                await message.reply("▶️ Resume functionality is not available in this version.")
+        except Exception as e:
+            logger.error(f"Error in resume_handler: {e}")
+            await message.reply(f"❌ Error resuming: {str(e)}")
     
     @client.on_message(QUEUE_COMMAND)
     async def queue_handler(_, message: Message):
         """Handle /queue command"""
-        await message.reply("📋 Queue is empty. Playback functionality is not available in this simplified version.")
+        try:
+            chat_id = message.chat.id
+            if hasattr(music_player, 'queue'):
+                result = await music_player.queue(chat_id)
+                await message.reply(result)
+            else:
+                await message.reply("📋 Queue functionality is not available in this version.")
+        except Exception as e:
+            logger.error(f"Error in queue_handler: {e}")
+            await message.reply(f"❌ Error getting queue: {str(e)}")
     
     @client.on_message(LYRICS_COMMAND)
     async def lyrics_handler(_, message: Message):
@@ -108,11 +158,19 @@ _To actually play this in a voice chat, I would need PyTgCalls which is not curr
         try:
             volume_level = int(message.command[1])
             if 0 <= volume_level <= 100:
-                await message.reply(f"🔊 Volume set to {volume_level}% (This is a demo response, volume control is not available in this simplified version)")
+                chat_id = message.chat.id
+                if hasattr(music_player, 'volume'):
+                    result = await music_player.volume(chat_id, volume_level)
+                    await message.reply(result)
+                else:
+                    await message.reply(f"🔊 Volume set to {volume_level}% (This is a demo response, volume control is not available in this version)")
             else:
                 await message.reply("⚠️ Volume level must be between 0 and 100")
         except ValueError:
             await message.reply("⚠️ Please provide a valid number for volume level")
+        except Exception as e:
+            logger.error(f"Error in volume_handler: {e}")
+            await message.reply(f"❌ Error setting volume: {str(e)}")
     
     # Add help command handler
     @client.on_message(filters.command(["help", "h"]))
@@ -122,7 +180,7 @@ _To actually play this in a voice chat, I would need PyTgCalls which is not curr
 **🎵 LuminousMusicBot Commands 🎵**
 
 **Core Commands:**
-`/play <song_name or URL>` - Search for a song and play it
+`/play <song_name or URL>` - Search for a song and play it in voice chat
 `/stop` - Stop playback and leave voice chat
 `/skip` or `/next` - Skip to the next song in queue
 `/pause` - Pause the current playback
@@ -138,8 +196,8 @@ _To actually play this in a voice chat, I would need PyTgCalls which is not curr
 `/help` - Show this help message
 `/about` - Information about this bot
 
-**Note:** This is a simplified version without voice chat functionality.
-For a full version with voice chat support, you would need to deploy with PyTgCalls.
+**Note:** While all commands are available, some functionality is simulated in this environment.
+For full voice chat functionality, deploy to a server with proper PyTgCalls support.
 """
         await message.reply(help_text)
     

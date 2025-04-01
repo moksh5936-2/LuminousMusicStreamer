@@ -44,7 +44,10 @@ def run_telegram_bot():
         # Define an async function to handle the bot's lifecycle
         async def run_bot():
             try:
-                await client.start()
+                # Start the client if it's not already started
+                if not client.is_connected:
+                    await client.start()
+                    
                 logger.info("Bot is now running!")
                 
                 # Instead of using client.idle(), we'll create our own idle function
@@ -56,8 +59,13 @@ def run_telegram_bot():
                         await sleep(3600)  # Sleep for an hour, or until interrupted
                     except asyncio.CancelledError:
                         break
+            except Exception as e:
+                logger.error(f"Error during bot runtime: {e}")
             finally:
-                await client.stop()
+                # Stop the client if it's still connected
+                if client.is_connected:
+                    await client.stop()
+                    
                 logger.info("Bot stopped.")
         
         # Run the async function
