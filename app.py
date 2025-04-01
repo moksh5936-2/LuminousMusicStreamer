@@ -117,7 +117,8 @@ def search():
 @app.route('/history')
 def history():
     """Search history page"""
-    searches = SearchHistory.query.order_by(SearchHistory.created_at.desc()).all()
+    # Fixed query syntax for newer SQLAlchemy versions
+    searches = db.session.query(SearchHistory).order_by(SearchHistory.created_at.desc()).all()
     return render_template('history.html', searches=searches)
 
 if __name__ == '__main__':
