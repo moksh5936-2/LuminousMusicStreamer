@@ -1,5 +1,5 @@
 """
-Web interface for LuminousMusicBot - A lightweight Telegram music bot
+Web interface for ADHISHTA NANDY - A lightweight Telegram music bot
 """
 import os
 import asyncio
@@ -18,7 +18,7 @@ db = SQLAlchemy(model_class=Base)
 
 # create the app
 app = Flask(__name__)
-app.secret_key = os.environ.get("SESSION_SECRET", "luminousmusicbot_secret_key")
+app.secret_key = os.environ.get("SESSION_SECRET", "adhishta_nandy_secret_key")
 
 # configure the database, handle Heroku's DATABASE_URL format
 database_url = os.environ.get("DATABASE_URL", "sqlite:///bot.db")
@@ -57,11 +57,16 @@ def index():
 @app.route('/about')
 def about():
     """About page"""
-    return render_template('about.html')
+    # Set your bot's username (this will be available in the template)
+    bot_username = os.environ.get("BOT_USERNAME", "ADHISHTHA_bot")
+    return render_template('about.html', bot_username=bot_username)
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
     """Search for YouTube videos"""
+    # Set your bot's username (this will be available in the template)
+    bot_username = os.environ.get("BOT_USERNAME", "ADHISHTHA_bot")
+    
     if request.method == 'POST':
         query = request.form.get('query', '')
         
@@ -103,25 +108,29 @@ def search():
                                        title=title,
                                        duration=duration,
                                        thumbnail=thumbnail,
-                                       video_url=video_url)
+                                       video_url=video_url,
+                                       bot_username=bot_username)
             else:
                 flash('No results found', 'warning')
-                return render_template('search.html', result=False, query=query)
+                return render_template('search.html', result=False, query=query, bot_username=bot_username)
                 
         except Exception as e:
             flash(f'Error: {str(e)}', 'danger')
             app.logger.error(f'Search error: {e}')
-            return render_template('search.html', result=False, query=query, error=str(e))
+            return render_template('search.html', result=False, query=query, error=str(e), bot_username=bot_username)
     
     # GET request
-    return render_template('search.html', result=None)
+    return render_template('search.html', result=None, bot_username=bot_username)
 
 @app.route('/history')
 def history():
     """Search history page"""
+    # Set your bot's username (this will be available in the template)
+    bot_username = os.environ.get("BOT_USERNAME", "ADHISHTHA_bot")
+    
     # Fixed query syntax for newer SQLAlchemy versions
     searches = db.session.query(SearchHistory).order_by(SearchHistory.created_at.desc()).all()
-    return render_template('history.html', searches=searches)
+    return render_template('history.html', searches=searches, bot_username=bot_username)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)

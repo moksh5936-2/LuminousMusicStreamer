@@ -1,5 +1,5 @@
 """
-Helper functions and command handlers for the bot.
+Helper functions and command handlers for ADHISHTA NANDY Telegram music bot.
 """
 import logging
 import re
@@ -223,7 +223,7 @@ See /help for setup instructions.
     async def help_handler(_, message: Message):
         """Handle /help command"""
         help_text = """
-**🎵 LuminousMusicBot Commands 🎵**
+**🎵 ADHISHTA NANDY Commands 🎵**
 
 **Core Commands:**
 `/play <song_name or URL>` - Search for a song and play it in voice chat
@@ -260,7 +260,7 @@ For best performance, ensure the bot has permission to join and speak in voice c
         start_text = f"""
 **👋 Hello {message.from_user.mention}!**
 
-I'm **LuminousMusicBot**, a lightweight Telegram music bot that can play songs in voice chats.
+I'm **ADHISHTA NANDY**, a lightweight Telegram music bot that can play songs in voice chats.
 
 **Key Features:**
 • Play music from YouTube in voice chats
@@ -283,7 +283,7 @@ Use `/help` to see all available commands.
     async def about_handler(_, message: Message):
         """Handle /about command"""
         about_text = """
-**🎵 LuminousMusicBot**
+**🎵 ADHISHTA NANDY**
 
 A lightweight Telegram bot designed for music playback in voice chats.
 

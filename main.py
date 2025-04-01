@@ -1,5 +1,5 @@
 """
-LuminousMusicBot - A lightweight Telegram music bot for voice chat streaming.
+ADHISHTA NANDY - A lightweight Telegram music bot for voice chat streaming.
 Main entry point for the bot.
 """
 import os
