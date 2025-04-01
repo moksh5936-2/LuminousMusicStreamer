@@ -105,20 +105,31 @@ class MusicPlayer:
     async def _ensure_voice_chat(self, chat_id: int) -> bool:
         """Check if voice chat is active in the chat"""
         try:
-            # Try to get full chat to check voice chat status
-            chat = await self.client.get_chat(chat_id)
-            
-            # Get group call using PyTgCalls
-            group_call = await self.pytgcalls.get_group_call(chat_id)
-            
-            if group_call:
-                logger.info(f"Voice chat is active in chat {chat_id}")
-                return True
-            else:
-                await self.client.send_message(
+            # Try to join active voice chat
+            try:
+                await self.pytgcalls.join_group_call(
                     chat_id,
-                    "❌ No active voice chat found! Please ask a group admin to start a voice chat first."
+                    stream=None,
+                    join_as=None
                 )
+                logger.info(f"Successfully joined voice chat in {chat_id}")
+                return True
+            except Exception as e:
+                if "GROUPCALL_FORBIDDEN" in str(e):
+                    await self.client.send_message(
+                        chat_id,
+                        "❌ I don't have permission to join voice chats. Make sure I'm an admin with 'Manage Voice Chats' permission."
+                    )
+                elif "GROUPCALL_INVALID" in str(e):
+                    await self.client.send_message(
+                        chat_id,
+                        "❌ No active voice chat found! Please ask a group admin to start a voice chat first."
+                    )
+                else:
+                    await self.client.send_message(
+                        chat_id,
+                        f"❌ Error joining voice chat: {str(e)}"
+                    )
                 return False
 
         except Exception as e:
