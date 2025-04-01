@@ -226,9 +226,18 @@ Please make sure:
 
                 # Join the voice chat and play the audio (PyTgCalls v2.1.1)
                 try:
-                    await self.pytgcalls.play(
+                    # First stop any existing stream
+                    if chat_id in self.active_chats:
+                        try:
+                            await self.pytgcalls.leave_call(chat_id)
+                            await asyncio.sleep(1)  # Give it a moment to clean up
+                        except:
+                            pass  # Ignore errors from stopping existing stream
+                            
+                    # Now try to play the new stream
+                    await self.pytgcalls.join_group_call(
                         chat_id,
-                        MediaStream(
+                        stream=MediaStream(
                             audio_file,
                             audio_parameters=AudioQuality.HIGH
                         )
