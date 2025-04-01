@@ -41,20 +41,32 @@ def run_telegram_bot():
         # Create and run the bot
         client = create_bot()
         
-        # Start the bot
-        loop.run_until_complete(client.start())
+        # Define an async function to handle the bot's lifecycle
+        async def run_bot():
+            try:
+                await client.start()
+                logger.info("Bot is now running!")
+                
+                # Instead of using client.idle(), we'll create our own idle function
+                # to keep the bot running until interrupted
+                from asyncio import sleep
+                
+                while True:
+                    try:
+                        await sleep(3600)  # Sleep for an hour, or until interrupted
+                    except asyncio.CancelledError:
+                        break
+            finally:
+                await client.stop()
+                logger.info("Bot stopped.")
         
-        # Idle to keep the bot running
-        logger.info("Bot is now running!")
-        loop.run_until_complete(client.idle())
+        # Run the async function
+        loop.run_until_complete(run_bot())
         
     except Exception as e:
         logger.error(f"Error in Telegram bot: {e}")
     finally:
-        # Cleanup
-        if 'client' in locals() and 'loop' in locals():
-            loop.run_until_complete(client.stop())
-        logger.info("Bot stopped.")
+        loop.close()
 
 if __name__ == "__main__":
     # Check if we're running in a web environment (gunicorn)
