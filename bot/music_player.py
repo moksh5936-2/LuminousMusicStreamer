@@ -107,10 +107,10 @@ class MusicPlayer:
         try:
             # Try to join active voice chat
             try:
-                await self.pytgcalls.join_call(
+                await self.pytgcalls.join_group_call(
                     chat_id,
                     stream=None,
-                    join_as=None
+                    stream_type=None
                 )
                 logger.info(f"Successfully joined voice chat in {chat_id}")
                 return True
