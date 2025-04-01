@@ -6,18 +6,10 @@ import re
 from pyrogram import filters
 from pyrogram.types import Message
 from bot.ytdl import get_video_info
+from bot.music_player import MusicPlayer
 
-# Try to import the real player, but fall back to simulated if needed
-try:
-    from bot.music_player import MusicPlayer
-    USE_REAL_PLAYER = True
-    logger = logging.getLogger(__name__)
-    logger.info("Using real PyTgCalls music player")
-except Exception as e:
-    from bot.simulated_player import SimulatedMusicPlayer as MusicPlayer
-    USE_REAL_PLAYER = False
-    logger = logging.getLogger(__name__)
-    logger.info(f"Using simulated music player due to error: {e}")
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Global music player instance to be initialized when needed
 music_player = None
@@ -196,8 +188,8 @@ def register_handlers(client):
 `/help` - Show this help message
 `/about` - Information about this bot
 
-**Note:** While all commands are available, some functionality is simulated in this environment.
-For full voice chat functionality, deploy to a server with proper PyTgCalls support.
+**Note:** All commands are fully functional. The bot will download the audio, join the voice chat, and play the music.
+For best performance, ensure the bot has permission to join and speak in voice chats.
 """
         await message.reply(help_text)
     
@@ -208,9 +200,15 @@ For full voice chat functionality, deploy to a server with proper PyTgCalls supp
         start_text = f"""
 **👋 Hello {message.from_user.mention}!**
 
-I'm **LuminousMusicBot**, a lightweight Telegram bot for YouTube search and info.
+I'm **LuminousMusicBot**, a lightweight Telegram music bot that can play songs in voice chats.
 
-Use `/help` to see available commands.
+**Key Features:**
+• Play music from YouTube in voice chats
+• Queue system for multiple songs
+• Control playback with pause/resume/skip commands
+• Web interface for song search history
+
+Use `/help` to see all available commands.
 """
         await message.reply(start_text)
         
