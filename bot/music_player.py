@@ -160,7 +160,10 @@ class MusicPlayer:
                         return True
                     except Exception as e:
                         if "USER_NOT_ADMIN" in str(e):
-                            logger.error(f"Bot is not an admin in the chat {chat_id}, cannot create voice chat")
+                            logger.error(f"Bot is not an admin in the chat {chat_id}, cannot manage voice chat")
+                            return False
+                        elif "BOT_METHOD_INVALID" in str(e):
+                            logger.error("Bots cannot create voice chats. A group admin must start the voice chat manually first.")
                             return False
                         elif "PARTICIPANTS_TOO_FEW" in str(e):
                             logger.error(f"Not enough participants to create a voice chat in {chat_id}")
