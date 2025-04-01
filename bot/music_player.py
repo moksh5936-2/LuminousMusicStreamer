@@ -145,19 +145,12 @@ class MusicPlayer:
                         logger.info(f"Voice chat is already active in chat {chat_id}")
                         return True
                     
-                    # If not, try to create one
-                    logger.info(f"Creating voice chat in chat {chat_id}")
-                    try:
-                        await self.client.invoke(
-                            CreateGroupCall(
-                                peer=peer,
-                                random_id=random.randint(10000, 999999999)
-                            )
-                        )
-                        logger.info(f"Voice chat created in chat {chat_id}")
-                        # Sleep briefly to allow voice chat to initialize
-                        await asyncio.sleep(2)
-                        return True
+                    # Bot cannot create voice chats, inform the user
+                    logger.info("Cannot create voice chat - requires admin action")
+                    raise Exception(
+                        "No active voice chat found. As a bot, I cannot create voice chats. "
+                        "Please ask a group admin to start a voice chat manually."
+                    )
                     except Exception as e:
                         if "USER_NOT_ADMIN" in str(e):
                             logger.error(f"Bot is not an admin in the chat {chat_id}, cannot manage voice chat")
