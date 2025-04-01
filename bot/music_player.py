@@ -151,9 +151,9 @@ class MusicPlayer:
                         "No active voice chat found. As a bot, I cannot create voice chats. "
                         "Please ask a group admin to start a voice chat manually."
                     )
-                    except Exception as e:
-                        if "USER_NOT_ADMIN" in str(e):
-                            logger.error(f"Bot is not an admin in the chat {chat_id}, cannot manage voice chat")
+                except Exception as e:
+                    if "USER_NOT_ADMIN" in str(e):
+                        logger.error(f"Bot is not an admin in the chat {chat_id}, cannot manage voice chat")
                             return False
                         elif "BOT_METHOD_INVALID" in str(e):
                             logger.error("Bots cannot create voice chats. A group admin must start the voice chat manually first.")
